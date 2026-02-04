@@ -28,4 +28,5 @@
 .\objects\oled.o: .\library\stm32f10x_usart.h
 .\objects\oled.o: .\library\stm32f10x_wwdg.h
 .\objects\oled.o: .\library\misc.h
+.\objects\oled.o: OLED_Font.h
 .\objects\oled.o: delay.h

@@ -72,8 +72,8 @@ void Motor_Forward(void)
     GPIO_ResetBits(MOTOR_PORT, IN4_PIN);
 
     // 通过PID计算，设置直线行驶PWM=99（最大速度）
-    float left_pwm = PID_Calc(&PID_MotorLeft, 99, TIM_GetCompare1(MOTOR_TIM));   // 目标PWM值 - 最大速度
-    float right_pwm = PID_Calc(&PID_MotorRight, 99, TIM_GetCompare2(MOTOR_TIM)); // 目标PWM值 - 最大速度
+    float left_pwm = PID_Calc(&PID_MotorLeft, 99, TIM_GetCapture1(MOTOR_TIM));   // 目标PWM值 - 最大速度
+    float right_pwm = PID_Calc(&PID_MotorRight, 99, TIM_GetCapture2(MOTOR_TIM)); // 目标PWM值 - 最大速度
 
     // PWM限幅（0~99）
     if (left_pwm > 99)
@@ -98,7 +98,7 @@ void Motor_Left(void)
     GPIO_ResetBits(MOTOR_PORT, IN4_PIN);
 
     // 通过PID计算，设置转向速度PWM=50
-    float right_pwm = PID_Calc(&PID_MotorRight, 50, TIM_GetCompare2(MOTOR_TIM)); // 目标PWM值 - 根据实际情况调整
+    float right_pwm = PID_Calc(&PID_MotorRight, 50, TIM_GetCapture2(MOTOR_TIM)); // 目标PWM值 - 根据实际情况调整
 
     // PWM限幅
     if (right_pwm > 99)
@@ -119,7 +119,7 @@ void Motor_Right(void)
     GPIO_ResetBits(MOTOR_PORT, IN3_PIN | IN4_PIN);
 
     // 通过PID计算，设置转向速度PWM=50
-    float left_pwm = PID_Calc(&PID_MotorLeft, 50, TIM_GetCompare1(MOTOR_TIM)); // 目标PWM值 - 根据实际情况调整
+    float left_pwm = PID_Calc(&PID_MotorLeft, 50, TIM_GetCapture1(MOTOR_TIM)); // 目标PWM值 - 根据实际情况调整
 
     // PWM限幅
     if (left_pwm > 99)

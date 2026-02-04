@@ -67,7 +67,7 @@ I (.\library\stm32f10x_usart.h)(0x4D783BB4)
 I (.\library\stm32f10x_wwdg.h)(0x4D783BB4)
 I (.\library\misc.h)(0x4D783BB4)
 F (.\user\stm32f10x_it.h)(0x4D99A59E)()
-F (.\main.c)(0x6982B277)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\car -I E:\Keil\ARM\ARMCC\include -I .\start -I .\library -I .\user -I .\-I.\RTE\_Target_1-IE:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.4.1\Device\Include-IE:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="524" -DSTM32F10X_LD -DSTM32F103C6 -DUSE_STDPERIPH_DRIVER-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
+F (.\main.c)(0x6982C114)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\car -I E:\Keil\ARM\ARMCC\include -I .\start -I .\library -I .\user -I .\-I.\RTE\_Target_1-IE:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.4.1\Device\Include-IE:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="524" -DSTM32F10X_LD -DSTM32F103C6 -DUSE_STDPERIPH_DRIVER-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
 I (.\start\stm32f10x.h)(0x61AD795E)
 I (.\start\core_cm3.h)(0x697CCEAA)
 I (E:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
@@ -905,7 +905,7 @@ I (.\library\stm32f10x_usart.h)(0x4D783BB4)
 I (.\library\stm32f10x_wwdg.h)(0x4D783BB4)
 I (.\library\misc.h)(0x4D783BB4)
 F (.\led.h)(0x697A54C2)()
-F (.\oled.c)(0x6982B69D)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\car -I E:\Keil\ARM\ARMCC\include -I .\start -I .\library -I .\user -I .\-I.\RTE\_Target_1-IE:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.4.1\Device\Include-IE:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="524" -DSTM32F10X_LD -DSTM32F103C6 -DUSE_STDPERIPH_DRIVER-o .\objects\oled.o --omf_browse .\objects\oled.crf --depend .\objects\oled.d)
+F (.\oled.c)(0x6982BC18)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\car -I E:\Keil\ARM\ARMCC\include -I .\start -I .\library -I .\user -I .\-I.\RTE\_Target_1-IE:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.4.1\Device\Include-IE:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="524" -DSTM32F10X_LD -DSTM32F103C6 -DUSE_STDPERIPH_DRIVER-o .\objects\oled.o --omf_browse .\objects\oled.crf --depend .\objects\oled.d)
 I (.\start\stm32f10x.h)(0x61AD795E)
 I (.\start\core_cm3.h)(0x697CCEAA)
 I (E:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588B8344)
@@ -934,10 +934,11 @@ I (.\library\stm32f10x_tim.h)(0x4D783BB4)
 I (.\library\stm32f10x_usart.h)(0x4D783BB4)
 I (.\library\stm32f10x_wwdg.h)(0x4D783BB4)
 I (.\library\misc.h)(0x4D783BB4)
+I (OLED_Font.h)(0x6982BC15)
 I (delay.h)(0x697B4CB5)
 F (.\oled.h)(0x697A54C2)()
-F (.\oled_Font.h)(0x6982B3AF)()
-F (.\motor.c)(0x6981EDF8)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\car -I E:\Keil\ARM\ARMCC\include -I .\start -I .\library -I .\user -I .\-I.\RTE\_Target_1-IE:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.4.1\Device\Include-IE:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="524" -DSTM32F10X_LD -DSTM32F103C6 -DUSE_STDPERIPH_DRIVER-o .\objects\motor.o --omf_browse .\objects\motor.crf --depend .\objects\motor.d)
+F (.\oled_Font.h)(0x6982BC15)()
+F (.\motor.c)(0x6982C0A6)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\car -I E:\Keil\ARM\ARMCC\include -I .\start -I .\library -I .\user -I .\-I.\RTE\_Target_1-IE:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.4.1\Device\Include-IE:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="524" -DSTM32F10X_LD -DSTM32F103C6 -DUSE_STDPERIPH_DRIVER-o .\objects\motor.o --omf_browse .\objects\motor.crf --depend .\objects\motor.d)
 I (motor.h)(0x698025D8)
 I (.\start\stm32f10x.h)(0x61AD795E)
 I (.\start\core_cm3.h)(0x697CCEAA)

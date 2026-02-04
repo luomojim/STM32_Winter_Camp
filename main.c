@@ -37,8 +37,8 @@ void move_back_cm(float cm, float target_pwm)
     GPIO_SetBits(MOTOR_PORT, IN4_PIN);
 
     // 通过PID计算实际PWM值
-    float left_pwm = PID_Calc(&PID_MotorLeft, target_pwm, TIM_GetCompare1(MOTOR_TIM));
-    float right_pwm = PID_Calc(&PID_MotorRight, target_pwm, TIM_GetCompare2(MOTOR_TIM));
+    float left_pwm = PID_Calc(&PID_MotorLeft, target_pwm, TIM_GetCapture1(MOTOR_TIM));
+    float right_pwm = PID_Calc(&PID_MotorRight, target_pwm, TIM_GetCapture2(MOTOR_TIM));
 
     // PWM限幅（0-99）
     left_pwm = (left_pwm > 99) ? 99 : (left_pwm < 0) ? 0
@@ -82,8 +82,8 @@ void move_forward_cm(float cm, float target_pwm)
     GPIO_ResetBits(MOTOR_PORT, IN4_PIN);
 
     // 通过PID计算实际PWM值
-    float left_pwm = PID_Calc(&PID_MotorLeft, target_pwm, TIM_GetCompare1(MOTOR_TIM));
-    float right_pwm = PID_Calc(&PID_MotorRight, target_pwm, TIM_GetCompare2(MOTOR_TIM));
+    float left_pwm = PID_Calc(&PID_MotorLeft, target_pwm, TIM_GetCapture1(MOTOR_TIM));
+    float right_pwm = PID_Calc(&PID_MotorRight, target_pwm, TIM_GetCapture2(MOTOR_TIM));
 
     // PWM限幅（0-99）
     left_pwm = (left_pwm > 99) ? 99 : (left_pwm < 0) ? 0
@@ -237,25 +237,25 @@ int main(void)
             if (red3 == IR_HAVE_OBSTACLE && red5 == IR_HAVE_OBSTACLE)
             {
                 // RED3+RED5同时检测到障碍物，轻微右转调整
-                left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm + 10, TIM_GetCompare1(MOTOR_TIM));
-                right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm, TIM_GetCompare2(MOTOR_TIM));
+                left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm + 10, TIM_GetCapture1(MOTOR_TIM));
+                right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm, TIM_GetCapture2(MOTOR_TIM));
             }
             else if (red3 == IR_HAVE_OBSTACLE)
             {
                 // RED3检测到障碍物，右转调整
-                left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm, TIM_GetCompare1(MOTOR_TIM));
-                right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm + 10, TIM_GetCompare2(MOTOR_TIM));
+                left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm, TIM_GetCapture1(MOTOR_TIM));
+                right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm + 10, TIM_GetCapture2(MOTOR_TIM));
             }
             else if (red5 == IR_HAVE_OBSTACLE)
             {
                 // RED5检测到障碍物，左转调整
-                left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm + 10, TIM_GetCompare1(MOTOR_TIM));
-                right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm, TIM_GetCompare2(MOTOR_TIM));
+                left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm + 10, TIM_GetCapture1(MOTOR_TIM));
+                right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm, TIM_GetCapture2(MOTOR_TIM));
             }
             else
             {
-                left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm, TIM_GetCompare1(MOTOR_TIM));
-                right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm, TIM_GetCompare2(MOTOR_TIM));
+                left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm, TIM_GetCapture1(MOTOR_TIM));
+                right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm, TIM_GetCapture2(MOTOR_TIM));
             }
 
             // PWM限幅
@@ -285,25 +285,25 @@ int main(void)
             if (red4 == IR_HAVE_OBSTACLE && red6 == IR_HAVE_OBSTACLE)
             {
                 // RED4+RED6同时检测到障碍物，轻微左转调整
-                left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm, TIM_GetCompare1(MOTOR_TIM));
-                right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm + 10, TIM_GetCompare2(MOTOR_TIM));
+                left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm, TIM_GetCapture1(MOTOR_TIM));
+                right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm + 10, TIM_GetCapture2(MOTOR_TIM));
             }
             else if (red4 == IR_HAVE_OBSTACLE)
             {
                 // RED4检测到障碍物，左转调整
-                left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm + 10, TIM_GetCompare1(MOTOR_TIM));
-                right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm, TIM_GetCompare2(MOTOR_TIM));
+                left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm + 10, TIM_GetCapture1(MOTOR_TIM));
+                right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm, TIM_GetCapture2(MOTOR_TIM));
             }
             else if (red6 == IR_HAVE_OBSTACLE)
             {
                 // RED6检测到障碍物，右转调整
-                left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm, TIM_GetCompare1(MOTOR_TIM));
-                right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm + 10, TIM_GetCompare2(MOTOR_TIM));
+                left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm, TIM_GetCapture1(MOTOR_TIM));
+                right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm + 10, TIM_GetCapture2(MOTOR_TIM));
             }
             else
             {
-                left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm, TIM_GetCompare1(MOTOR_TIM));
-                right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm, TIM_GetCompare2(MOTOR_TIM));
+                left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm, TIM_GetCapture1(MOTOR_TIM));
+                right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm, TIM_GetCapture2(MOTOR_TIM));
             }
 
             // PWM限幅
@@ -330,8 +330,8 @@ int main(void)
             }
 
             // 使用当前速度PWM值
-            float left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm, TIM_GetCompare1(MOTOR_TIM));
-            float right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm, TIM_GetCompare2(MOTOR_TIM));
+            float left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm, TIM_GetCapture1(MOTOR_TIM));
+            float right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm, TIM_GetCapture2(MOTOR_TIM));
 
             // PWM限幅
             left_pwm = (left_pwm > 99) ? 99 : (left_pwm < 0) ? 0
@@ -357,8 +357,8 @@ int main(void)
             }
 
             // 使用当前速度PWM值
-            float left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm, TIM_GetCompare1(MOTOR_TIM));
-            float right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm, TIM_GetCompare2(MOTOR_TIM));
+            float left_pwm = PID_Calc(&PID_MotorLeft, current_speed_pwm, TIM_GetCapture1(MOTOR_TIM));
+            float right_pwm = PID_Calc(&PID_MotorRight, current_speed_pwm, TIM_GetCapture2(MOTOR_TIM));
 
             // PWM限幅
             left_pwm = (left_pwm > 99) ? 99 : (left_pwm < 0) ? 0

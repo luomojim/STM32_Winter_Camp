@@ -1,5 +1,5 @@
 #include "stm32f10x.h"
-// #include "OLED_Font.h"
+#include "OLED_Font.h"
 #include "delay.h"
 
 #define OLED_W_SCL(x) GPIO_WriteBit(GPIOB, GPIO_Pin_8, (BitAction)(x))

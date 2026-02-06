@@ -26,9 +26,9 @@
 
 // 函数声明
 void Motor_Init(void);
-void Motor_Forward(void);
-void Motor_Left(void);
-void Motor_Right(void);
+void Motor_Forward(float left_pwm, float right_pwm);
+void Motor_Left(float right_pwm);
+void Motor_Right(float left_pwm);
 void Motor_Stop(void);
 
 #endif

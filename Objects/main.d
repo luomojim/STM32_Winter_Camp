@@ -31,5 +31,5 @@
 .\objects\main.o: delay.h
 .\objects\main.o: IRSensor.h
 .\objects\main.o: motor.h
-.\objects\main.o: PID.h
 .\objects\main.o: Ultrasound.h
+.\objects\main.o: pwm.h

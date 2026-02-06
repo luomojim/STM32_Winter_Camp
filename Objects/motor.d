@@ -29,4 +29,4 @@
 .\objects\motor.o: .\library\stm32f10x_usart.h
 .\objects\motor.o: .\library\stm32f10x_wwdg.h
 .\objects\motor.o: .\library\misc.h
-.\objects\motor.o: PID.h
+.\objects\motor.o: pwm.h

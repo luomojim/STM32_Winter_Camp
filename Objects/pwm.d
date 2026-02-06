@@ -28,3 +28,4 @@
 .\objects\pwm.o: .\library\stm32f10x_usart.h
 .\objects\pwm.o: .\library\stm32f10x_wwdg.h
 .\objects\pwm.o: .\library\misc.h
+.\objects\pwm.o: delay.h

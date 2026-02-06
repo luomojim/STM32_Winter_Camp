@@ -1,48 +1,91 @@
 #include "stm32f10x.h"
+#include "delay.h"
+
+// PWM????
+#define PWM_PERIOD 100										 // PWM??(100???)
+#define PWM_FREQUENCY 1000									 // PWM??(Hz)
+#define PWM_UNIT_TIME (1000000 / PWM_FREQUENCY / PWM_PERIOD) // ??PWM??????
+
+// PWM?????
+static uint16_t pwm_compare1 = 0;
+static uint16_t pwm_compare2 = 0;
+static uint8_t pwm_running = 0;
 
 void PWM_Init(void)
 {
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
+	// ??GPIO??
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-	
+
+	// ??GPIO???????
 	GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
-	
-	TIM_InternalClockConfig(TIM1);
-	
-	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
-	TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
-	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInitStructure.TIM_Period = 100 - 1;
-	TIM_TimeBaseInitStructure.TIM_Prescaler = 72 - 1;
-	TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 0;
-	TIM_TimeBaseInit(TIM1, &TIM_TimeBaseInitStructure);
-	
-	TIM_OCInitTypeDef TIM_OCInitStructure;
-	TIM_OCStructInit(&TIM_OCInitStructure);
-	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
-	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
-	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = 0;
-	TIM_OC1Init(TIM1, &TIM_OCInitStructure);
-	TIM_OC1PreloadConfig(TIM1, TIM_OCPreload_Enable);
-	
-	TIM_OC2Init(TIM1, &TIM_OCInitStructure);
-	TIM_OC2PreloadConfig(TIM1, TIM_OCPreload_Enable);
-	
-	TIM_CtrlPWMOutputs(TIM1, ENABLE);
-	TIM_Cmd(TIM1, ENABLE);
+
+	// ?????????
+	GPIO_ResetBits(GPIOA, GPIO_Pin_8);
+	GPIO_ResetBits(GPIOA, GPIO_Pin_9);
+
+	// ??PWM????
+	pwm_running = 1;
 }
 
 void PWM_SetCompare1(uint16_t Compare)
 {
-	TIM_SetCompare1(TIM1, Compare);
+	// ???????
+	if (Compare > PWM_PERIOD)
+	{
+		Compare = PWM_PERIOD;
+	}
+	pwm_compare1 = Compare;
 }
 
 void PWM_SetCompare2(uint16_t Compare)
 {
-	TIM_SetCompare2(TIM1, Compare);
+	// ???????
+	if (Compare > PWM_PERIOD)
+	{
+		Compare = PWM_PERIOD;
+	}
+	pwm_compare2 = Compare;
+}
+
+// PWM????,?????????
+void PWM_Task(void)
+{
+	if (!pwm_running)
+	{
+		return;
+	}
+
+	// ??PWM??
+	if (pwm_compare1 > 0)
+	{
+		GPIO_SetBits(GPIOA, GPIO_Pin_8);
+	}
+	if (pwm_compare2 > 0)
+	{
+		GPIO_SetBits(GPIOA, GPIO_Pin_9);
+	}
+
+	// ???????
+	Delay_us(pwm_compare1 * PWM_UNIT_TIME);
+	if (pwm_compare1 > 0)
+	{
+		GPIO_ResetBits(GPIOA, GPIO_Pin_8);
+	}
+
+	Delay_us(pwm_compare2 * PWM_UNIT_TIME);
+	if (pwm_compare2 > 0)
+	{
+		GPIO_ResetBits(GPIOA, GPIO_Pin_9);
+	}
+
+	// ??????,??????
+	uint16_t max_compare = (pwm_compare1 > pwm_compare2) ? pwm_compare1 : pwm_compare2;
+	if (max_compare < PWM_PERIOD)
+	{
+		Delay_us((PWM_PERIOD - max_compare) * PWM_UNIT_TIME);
+	}
 }

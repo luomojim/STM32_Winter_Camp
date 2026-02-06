@@ -1,19 +1,40 @@
+/**
+ * @file main.c
+ * @brief 智能小车避障系统主程序
+ * @details 实现基于超声波和红外传感器的多场景避障逻辑
+ *          包含8种避障场景，按优先级从高到低处理
+ * @author STM32 Winter Camp
+ * @date 2026-02-06
+ */
+
 #include "stm32f10x.h"
 #include "delay.h"
 #include "IRSensor.h"
 #include "motor.h"
-#include "PID.h"
 #include "Ultrasound.h"
+#include "pwm.h"
 
-// 超声传感器相关宏已在Ultrasound.h中定义
+/**
+ * @brief 超声传感器配置参数
+ */
+#define ULTRASONIC_INVALID_LIMIT 2 // 超声无效值计数阈值（连续无效次数）
 
+/**
+ * @brief 速度控制参数
+ */
+#define SPEED_STEP 5.0f // 速度调整步长
+#define MIN_SPEED 5.0f  // 最小速度PWM值
+
+/**
+ * @brief 全局变量定义
+ */
 uint8_t ultrasonic_invalid_count = 0; // 超声传感器无效读数计数器
-#define SPEED_STEP 5.0f               // 速度调整步长
-#define MAX_SPEED 99.0f               // 最大速度PWM值
-#define MIN_SPEED 5.0f                // 最小速度PWM值
-float current_speed_pwm = MAX_SPEED;  // 当前速度PWM值，初始为最大速度
 
-// 延迟函数，根据移动距离计算所需时间（1cm对应20ms，实际需根据电机转速调整）
+/**
+ * @brief 延迟函数，根据移动距离计算所需时间
+ * @param cm 移动距离（厘米）
+ * @note 1cm对应20ms，实际需根据电机转速调整
+ */
 void delay_cm(float cm)
 {
     float time_ms = cm * 20; // 转换系数 - 根据实际情况调整
@@ -23,20 +44,19 @@ void delay_cm(float cm)
 /**
  * @brief 后退指定距离
  * @param cm 后退距离（厘米）
- * @param target_pwm 目标PWM值（0-99）
  * @note 通过PID算法计算实际PWM值，确保电机转速稳定
  */
-void move_back_cm(float cm, float target_pwm)
+void move_back_cm(float cm)
 {
-    // 设置电机反转方向电平
-    GPIO_ResetBits(MOTOR_PORT, IN1_PIN);
-    GPIO_SetBits(MOTOR_PORT, IN2_PIN);
+    // 设置电机反转方向电平（左电机正转，右电机反转）
+    GPIO_SetBits(MOTOR_PORT, IN1_PIN);
+    GPIO_ResetBits(MOTOR_PORT, IN2_PIN);
     GPIO_ResetBits(MOTOR_PORT, IN3_PIN);
     GPIO_SetBits(MOTOR_PORT, IN4_PIN);
 
-    // 直接使用目标PWM值（暂时不使用PID控制）
-    float left_pwm = target_pwm;
-    float right_pwm = target_pwm;
+    // 直接使用目标PWM值（TT1=80, TT2=70）
+    float left_pwm = 80.0f;
+    float right_pwm = 70.0f;
 
     // PWM限幅（0-99）
     left_pwm = (left_pwm > 99) ? 99 : (left_pwm < 0) ? 0
@@ -44,44 +64,33 @@ void move_back_cm(float cm, float target_pwm)
     right_pwm = (right_pwm > 99) ? 99 : (right_pwm < 0) ? 0
                                                         : right_pwm;
 
-    // 设置PWM占空比
-    TIM_SetCompare1(MOTOR_TIM, (uint16_t)left_pwm);
-    TIM_SetCompare2(MOTOR_TIM, (uint16_t)right_pwm);
+    // 设置PWM占空比（使用软件PWM）
+    PWM_SetCompare1((uint16_t)left_pwm);
+    PWM_SetCompare2((uint16_t)right_pwm);
 
     // 根据距离计算延迟时间
     delay_cm(cm);
 
     // 停止电机
     Motor_Stop();
-}
-
-/**
- * @brief 后退指定距离（使用默认PWM值）
- * @param cm 后退距离（厘米）
- * @note 默认PWM值为最大速度，适用于大多数场景
- */
-void move_back_cm_default(float cm)
-{
-    move_back_cm(cm, MAX_SPEED); // 使用默认PWM值为最大速度
 }
 
 /**
  * @brief 前进指定距离
  * @param cm 前进距离（厘米）
- * @param target_pwm 目标PWM值（0-99）
  * @note 通过PID算法计算实际PWM值，确保电机转速稳定
  */
-void move_forward_cm(float cm, float target_pwm)
+void move_forward_cm(float cm)
 {
-    // 设置电机正转方向电平
-    GPIO_SetBits(MOTOR_PORT, IN1_PIN);
-    GPIO_ResetBits(MOTOR_PORT, IN2_PIN);
+    // 设置电机正转方向电平（左电机反转，右电机正转）
+    GPIO_ResetBits(MOTOR_PORT, IN1_PIN);
+    GPIO_SetBits(MOTOR_PORT, IN2_PIN);
     GPIO_SetBits(MOTOR_PORT, IN3_PIN);
     GPIO_ResetBits(MOTOR_PORT, IN4_PIN);
 
-    // 直接使用目标PWM值（暂时不使用PID控制）
-    float left_pwm = target_pwm;
-    float right_pwm = target_pwm;
+    // 直接使用目标PWM值（TT1=80, TT2=70）
+    float left_pwm = 80.0f;
+    float right_pwm = 70.0f;
 
     // PWM限幅（0-99）
     left_pwm = (left_pwm > 99) ? 99 : (left_pwm < 0) ? 0
@@ -89,9 +98,9 @@ void move_forward_cm(float cm, float target_pwm)
     right_pwm = (right_pwm > 99) ? 99 : (right_pwm < 0) ? 0
                                                         : right_pwm;
 
-    // 设置PWM占空比
-    TIM_SetCompare1(MOTOR_TIM, (uint16_t)left_pwm);
-    TIM_SetCompare2(MOTOR_TIM, (uint16_t)right_pwm);
+    // 设置PWM占空比（使用软件PWM）
+    PWM_SetCompare1((uint16_t)left_pwm);
+    PWM_SetCompare2((uint16_t)right_pwm);
 
     // 根据距离计算延迟时间
     delay_cm(cm);
@@ -101,48 +110,49 @@ void move_forward_cm(float cm, float target_pwm)
 }
 
 /**
- * @brief 前进指定距离（使用默认PWM值）
- * @param cm 前进距离（厘米）
- * @note 默认PWM值为最大速度，适用于大多数场景
+ * @brief 右转（旋转约90度）
+ * @note 转向时间可根据实际情况调整
  */
-void move_forward_cm_default(float cm)
-{
-    move_forward_cm(cm, MAX_SPEED); // 使用默认PWM值为最大速度
-}
-
-// 右转（旋转约90度，实际需根据转向时间调整）
 void turn_right(void)
 {
-    Motor_Right();
+    Motor_Right(50.0f);
     Delay_ms(800); // 转向延迟时间 - 根据实际情况调整
     Motor_Stop();
 }
 
-// 左转（旋转约90度，实际需根据转向时间调整）
+/**
+ * @brief 左转（旋转约90度）
+ * @note 转向时间可根据实际情况调整
+ */
 void turn_left(void)
 {
-    Motor_Left();
+    Motor_Left(50.0f);
     Delay_ms(800); // 转向延迟时间 - 根据实际情况调整
     Motor_Stop();
 }
 
+/**
+ * @brief 主函数
+ * @return 无
+ * @details 实现智能小车的避障逻辑，按优先级处理不同的障碍物场景
+ */
 int main(void)
 {
     // 初始化所有模块
-    Motor_Init();
-    IRSensor_Init();
-    Ultrasonic_Init();
-    PID_Init();
+    Motor_Init();      // 电机驱动初始化
+    IRSensor_Init();   // 红外传感器初始化
+    Ultrasonic_Init(); // 超声波传感器初始化
+    PWM_Init();        // PWM初始化（软件PWM）
 
     while (1)
     {
         // 1. 读取所有红外传感器状态
-        uint8_t red1 = IRSensor_Detect(IR_PORT, RED1_PIN);
-        uint8_t red2 = IRSensor_Detect(IR_PORT, RED2_PIN);
-        uint8_t red3 = IRSensor_Detect(IR_PORT, RED3_PIN);
-        uint8_t red4 = IRSensor_Detect(IR_PORT, RED4_PIN);
-        uint8_t red5 = IRSensor_Detect(IR_PORT, RED5_PIN);
-        uint8_t red6 = IRSensor_Detect(IR_PORT, RED6_PIN);
+        uint8_t red1 = IRSensor_Detect(IR_PORT, RED1_PIN); // 左前红外
+        uint8_t red2 = IRSensor_Detect(IR_PORT, RED2_PIN); // 右前红外
+        uint8_t red3 = IRSensor_Detect(IR_PORT, RED3_PIN); // 左侧红外1
+        uint8_t red4 = IRSensor_Detect(IR_PORT, RED4_PIN); // 右侧红外1
+        uint8_t red5 = IRSensor_Detect(IR_PORT, RED5_PIN); // 左侧红外2
+        uint8_t red6 = IRSensor_Detect(IR_PORT, RED6_PIN); // 右侧红外2
 
         // 2. 读取超声传感器并判断减速/停车状态
         float distance = Test_Distance();
@@ -154,7 +164,7 @@ int main(void)
             ultrasonic_invalid_count = 0;
             if (distance <= ULTRASONIC_STOP_TRIGGER)
             {
-                ultrasonic_stop = 1;
+                ultrasonic_stop = 1; // 距离过近，触发停车
             }
             else if (distance > ULTRASONIC_STOP_TRIGGER && distance <= ULTRASONIC_DELAY_TRIGGER)
             {
@@ -163,210 +173,194 @@ int main(void)
         }
         else // 超声传感器无效读数
         {
-            ultrasonic_invalid_count++;
-            if (ultrasonic_invalid_count >= ULTRASONIC_INVALID_LIMIT)
-            {
-                ultrasonic_stop = 1;
-            }
+            ultrasonic_stop = 1; // 无效读数，触发停车
         }
 
         // 3. 执行主逻辑，按优先级从高到低处理（if-else if确保唯一执行路径）
-        // 优先级7：停车处理（最高优先级）
+
+        /**
+         * 优先级1：超声停车触发（最高优先级）
+         * 触发条件：距离≤1cm或无返回值
+         * 处理逻辑：立即停车
+         */
         if (ultrasonic_stop)
         {
             Motor_Stop();
         }
-        // 优先级1：减速+RED1+RED2同时检测到障碍物+其他未检测到
-        else if (ultrasonic_trigger && (red1 == IR_HAVE_OBSTACLE) && (red2 == IR_HAVE_OBSTACLE) && (red3 == IR_NO_OBSTACLE) && (red4 == IR_NO_OBSTACLE) && (red5 == IR_NO_OBSTACLE) && (red6 == IR_NO_OBSTACLE))
+
+        /**
+         * 优先级2：超声减速触发（距障碍5~1cm）+ RED1+RED2同触 + RED3/4/5/6均未触
+         * 处理逻辑：停车→延时200ms→倒车3cm→右转→直行10cm→右转→恢复直行
+         */
+        else if (ultrasonic_trigger && (red1 == IR_HAVE_OBSTACLE) && (red2 == IR_HAVE_OBSTACLE) &&
+                 (red3 == IR_NO_OBSTACLE) && (red4 == IR_NO_OBSTACLE) &&
+                 (red5 == IR_NO_OBSTACLE) && (red6 == IR_NO_OBSTACLE))
         {
             Motor_Stop();
             Delay_ms(200);
-            move_back_cm_default(3);
+            move_back_cm(3);
             turn_right();
-            move_forward_cm_default(10);
+            move_forward_cm(10);
             turn_right();
-            current_speed_pwm = MAX_SPEED; // 恢复默认速度
-            Motor_Forward();               // 恢复直线行驶
+            Motor_Forward(80.0f, 70.0f); // 恢复直线行驶
         }
-        // 优先级2：减速+RED1检测到障碍物+其他未检测到
-        else if (ultrasonic_trigger && (red1 == IR_HAVE_OBSTACLE) && (red2 == IR_NO_OBSTACLE) && (red3 == IR_NO_OBSTACLE) && (red4 == IR_NO_OBSTACLE) && (red5 == IR_NO_OBSTACLE) && (red6 == IR_NO_OBSTACLE))
+
+        /**
+         * 优先级3：超声减速触发（距障碍5~1cm）+ RED1单触 + RED2/3/4/5/6均未触
+         * 处理逻辑：倒车3cm→右转→直行14cm→左转→直行14cm→左转→直行14cm→右转→恢复直行
+         */
+        else if (ultrasonic_trigger && (red1 == IR_HAVE_OBSTACLE) && (red2 == IR_NO_OBSTACLE) &&
+                 (red3 == IR_NO_OBSTACLE) && (red4 == IR_NO_OBSTACLE) &&
+                 (red5 == IR_NO_OBSTACLE) && (red6 == IR_NO_OBSTACLE))
         {
-            move_back_cm_default(3);
+            move_back_cm(3);
             turn_right();
-            move_forward_cm_default(14);
+            move_forward_cm(14);
             turn_left();
-            move_forward_cm_default(14);
+            move_forward_cm(14);
             turn_left();
-            move_forward_cm_default(14);
+            move_forward_cm(14);
             turn_right();
-            current_speed_pwm = MAX_SPEED; // 恢复默认速度
-            Motor_Forward();               // 恢复直线行驶
+            Motor_Forward(80.0f, 70.0f); // 恢复直线行驶
         }
-        // 优先级3：减速+RED2检测到障碍物+其他未检测到
-        else if (ultrasonic_trigger && (red1 == IR_NO_OBSTACLE) && (red2 == IR_HAVE_OBSTACLE) && (red3 == IR_NO_OBSTACLE) && (red4 == IR_NO_OBSTACLE) && (red5 == IR_NO_OBSTACLE) && (red6 == IR_NO_OBSTACLE))
+
+        /**
+         * 优先级4：超声减速触发（距障碍5~1cm）+ RED2单触 + RED1/3/4/5/6均未触
+         * 处理逻辑：停车→延时200ms→倒车3cm→左转→直行14cm→右转→直行14cm→右转→直行14cm→左转→恢复直行
+         */
+        else if (ultrasonic_trigger && (red1 == IR_NO_OBSTACLE) && (red2 == IR_HAVE_OBSTACLE) &&
+                 (red3 == IR_NO_OBSTACLE) && (red4 == IR_NO_OBSTACLE) &&
+                 (red5 == IR_NO_OBSTACLE) && (red6 == IR_NO_OBSTACLE))
         {
             Motor_Stop();
             Delay_ms(200);
-            move_back_cm_default(3);
+            move_back_cm(3);
             turn_left();
-            move_forward_cm_default(14);
+            move_forward_cm(14);
             turn_right();
-            move_forward_cm_default(14);
+            move_forward_cm(14);
             turn_right();
-            move_forward_cm_default(14);
+            move_forward_cm(14);
             turn_left();
-            current_speed_pwm = MAX_SPEED; // 恢复默认速度
-            Motor_Forward();               // 恢复直线行驶
+            Motor_Forward(80.0f, 70.0f); // 恢复直线行驶
         }
-        // 优先级4：RED1/RED2未检测到+其他区域检测到障碍物（RED3/5至少一个）
+
+        /**
+         * 优先级5：RED1/RED2均未触 + 左侧红外触发（RED3/5任一触）
+         * 处理逻辑：分场景调速避障后回直行
+         */
         else if ((red1 == IR_NO_OBSTACLE) && (red2 == IR_NO_OBSTACLE) && (red3 || red5))
         {
-            // 平滑加速：逐渐恢复速度至最大速度
-            if (current_speed_pwm < MAX_SPEED)
-            {
-                current_speed_pwm += SPEED_STEP;
-                if (current_speed_pwm > MAX_SPEED)
-                {
-                    current_speed_pwm = MAX_SPEED;
-                }
-            }
-
             float left_pwm, right_pwm;
             if (red3 == IR_HAVE_OBSTACLE && red5 == IR_HAVE_OBSTACLE)
             {
-                // RED3+RED5同时检测到障碍物，轻微右转调整
-                left_pwm = current_speed_pwm + 10;
-                right_pwm = current_speed_pwm;
+                // RED3+RED5双触：左轮加速、右轮正常（远离左墙）
+                left_pwm = 90.0f;
+                right_pwm = 70.0f;
             }
             else if (red3 == IR_HAVE_OBSTACLE)
             {
-                // RED3检测到障碍物，右转调整
-                left_pwm = current_speed_pwm;
-                right_pwm = current_speed_pwm + 10;
+                // RED3单触：右轮加速、左轮正常（微调回正）
+                left_pwm = 80.0f;
+                right_pwm = 80.0f;
             }
             else if (red5 == IR_HAVE_OBSTACLE)
             {
-                // RED5检测到障碍物，左转调整
-                left_pwm = current_speed_pwm + 10;
-                right_pwm = current_speed_pwm;
+                // RED5单触：左轮加速、右轮正常（远离左墙）
+                left_pwm = 90.0f;
+                right_pwm = 70.0f;
             }
             else
             {
-                left_pwm = current_speed_pwm;
-                right_pwm = current_speed_pwm;
+                // 默认情况：恢复正常直行
+                Motor_Forward(80.0f, 70.0f);
+                continue;
             }
 
-            // PWM限幅
+            // PWM限幅（0-99）
             left_pwm = (left_pwm > 99) ? 99 : (left_pwm < 0) ? 0
                                                              : left_pwm;
             right_pwm = (right_pwm > 99) ? 99 : (right_pwm < 0) ? 0
                                                                 : right_pwm;
 
-            TIM_SetCompare1(MOTOR_TIM, (uint16_t)left_pwm);
-            TIM_SetCompare2(MOTOR_TIM, (uint16_t)right_pwm);
-            Motor_Forward();
+            // 使用传入的PWM值前进
+            Motor_Forward(left_pwm, right_pwm);
         }
-        // 优先级5：RED1/RED2未检测到+其他区域检测到障碍物（RED4/6至少一个）
+
+        /**
+         * 优先级6：RED1/RED2均未触 + 右侧红外触发（RED4/6任一触）
+         * 处理逻辑：分场景调速避障后回直行
+         */
         else if ((red1 == IR_NO_OBSTACLE) && (red2 == IR_NO_OBSTACLE) && (red4 || red6))
         {
-            // 平滑加速：逐渐恢复速度至最大速度
-            if (current_speed_pwm < MAX_SPEED)
-            {
-                current_speed_pwm += SPEED_STEP;
-                if (current_speed_pwm > MAX_SPEED)
-                {
-                    current_speed_pwm = MAX_SPEED;
-                }
-            }
-
             float left_pwm, right_pwm;
             if (red4 == IR_HAVE_OBSTACLE && red6 == IR_HAVE_OBSTACLE)
             {
-                // RED4+RED6同时检测到障碍物，轻微左转调整
-                left_pwm = current_speed_pwm;
-                right_pwm = current_speed_pwm + 10;
+                // RED4+RED6双触：右轮加速、左轮正常（远离右墙）
+                left_pwm = 80.0f;
+                right_pwm = 90.0f;
             }
             else if (red4 == IR_HAVE_OBSTACLE)
             {
-                // RED4检测到障碍物，左转调整
-                left_pwm = current_speed_pwm + 10;
-                right_pwm = current_speed_pwm;
+                // RED4单触：左轮加速、右轮正常（微调回正）
+                left_pwm = 80.0f;
+                right_pwm = 80.0f;
             }
             else if (red6 == IR_HAVE_OBSTACLE)
             {
-                // RED6检测到障碍物，右转调整
-                left_pwm = current_speed_pwm;
-                right_pwm = current_speed_pwm + 10;
+                // RED6单触：右轮加速、左轮正常（远离右墙）
+                left_pwm = 80.0f;
+                right_pwm = 90.0f;
             }
             else
             {
-                left_pwm = current_speed_pwm;
-                right_pwm = current_speed_pwm;
+                // 默认情况：恢复正常直行
+                Motor_Forward(80.0f, 70.0f);
+                continue;
             }
 
-            // PWM限幅
+            // PWM限幅（0-99）
             left_pwm = (left_pwm > 99) ? 99 : (left_pwm < 0) ? 0
                                                              : left_pwm;
             right_pwm = (right_pwm > 99) ? 99 : (right_pwm < 0) ? 0
                                                                 : right_pwm;
 
-            TIM_SetCompare1(MOTOR_TIM, (uint16_t)left_pwm);
-            TIM_SetCompare2(MOTOR_TIM, (uint16_t)right_pwm);
-            Motor_Forward();
+            // 使用传入的PWM值前进
+            Motor_Forward(left_pwm, right_pwm);
         }
-        // 优先级6：减速+无任何障碍物
-        else if (ultrasonic_trigger && (red1 == IR_NO_OBSTACLE) && (red2 == IR_NO_OBSTACLE) && (red3 == IR_NO_OBSTACLE) && (red4 == IR_NO_OBSTACLE) && (red5 == IR_NO_OBSTACLE) && (red6 == IR_NO_OBSTACLE))
+
+        /**
+         * 优先级7：超声减速触发（距障碍5~1cm）+ 无任何红外触发
+         * 处理逻辑：低速直行（仅减速不停车）
+         */
+        else if (ultrasonic_trigger && (red1 == IR_NO_OBSTACLE) && (red2 == IR_NO_OBSTACLE) &&
+                 (red3 == IR_NO_OBSTACLE) && (red4 == IR_NO_OBSTACLE) &&
+                 (red5 == IR_NO_OBSTACLE) && (red6 == IR_NO_OBSTACLE))
         {
-            // 平滑减速：逐渐降低速度至最小速度
-            if (current_speed_pwm > MIN_SPEED)
-            {
-                current_speed_pwm -= SPEED_STEP;
-                if (current_speed_pwm < MIN_SPEED)
-                {
-                    current_speed_pwm = MIN_SPEED;
-                }
-            }
+            // 低速直行（TT1=40, TT2=30）
+            float left_pwm = 40.0f;
+            float right_pwm = 30.0f;
 
-            // 直接使用目标PWM值（暂时不使用PID控制）
-            float left_pwm = current_speed_pwm;
-            float right_pwm = current_speed_pwm;
-
-            // PWM限幅
+            // PWM限幅（0-99）
             left_pwm = (left_pwm > 99) ? 99 : (left_pwm < 0) ? 0
                                                              : left_pwm;
             right_pwm = (right_pwm > 99) ? 99 : (right_pwm < 0) ? 0
                                                                 : right_pwm;
 
-            TIM_SetCompare1(MOTOR_TIM, (uint16_t)left_pwm);
-            TIM_SetCompare2(MOTOR_TIM, (uint16_t)right_pwm);
-            Motor_Forward();
+            // 使用传入的PWM值前进
+            Motor_Forward(left_pwm, right_pwm);
         }
-        // 优先级8：无任何障碍物，正常直线行驶（最低优先级）
+
+        /**
+         * 优先级8：无任何触发条件（最低优先级）
+         * 处理逻辑：正常直行
+         */
         else
         {
-            // 平滑加速：逐渐恢复速度至最大速度
-            if (current_speed_pwm < MAX_SPEED)
-            {
-                current_speed_pwm += SPEED_STEP;
-                if (current_speed_pwm > MAX_SPEED)
-                {
-                    current_speed_pwm = MAX_SPEED;
-                }
-            }
-
-            // 直接使用目标PWM值（暂时不使用PID控制）
-            float left_pwm = current_speed_pwm;
-            float right_pwm = current_speed_pwm;
-
-            // PWM限幅
-            left_pwm = (left_pwm > 99) ? 99 : (left_pwm < 0) ? 0
-                                                             : left_pwm;
-            right_pwm = (right_pwm > 99) ? 99 : (right_pwm < 0) ? 0
-                                                                : right_pwm;
-
-            TIM_SetCompare1(MOTOR_TIM, (uint16_t)left_pwm);
-            TIM_SetCompare2(MOTOR_TIM, (uint16_t)right_pwm);
-            Motor_Forward();
+            Motor_Forward(80.0f, 70.0f); // 正常直行（TT1=80, TT2=70）
         }
+
+        // 运行PWM任务，生成软件PWM波形
+        PWM_Task();
     }
 }

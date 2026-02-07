@@ -1,86 +1,82 @@
 #include "stm32f10x.h"
-#include "delay.h"
-// PWM配置参数
-#define PWM_PERIOD 100										 // PWM周期（100个单位）
-#define PWM_FREQUENCY 1000									 // PWM频率（Hz）
-#define PWM_UNIT_TIME (1000000 / PWM_FREQUENCY / PWM_PERIOD) // 每个PWM单位的微秒数
-// PWM占空比变量
-static uint16_t pwm_compare1 = 0;
-static uint16_t pwm_compare2 = 0;
-static uint8_t pwm_running = 0;
+#include "stm32f10x_tim.h"
+#include "stm32f10x_gpio.h"
+#include "stm32f10x_rcc.h"
+
+#define PWM_PERIOD 100
+
 void PWM_Init(void)
 {
-	// 启用GPIO时钟
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-	// 配置GPIO为推挽输出模式
-	GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-	// 初始化输出为低电平
-	GPIO_ResetBits(GPIOA, GPIO_Pin_8);
-	GPIO_ResetBits(GPIOA, GPIO_Pin_9);
-	// 标记PWM已初始化
-	pwm_running = 1;
+    GPIO_InitTypeDef GPIO_InitStructure;
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    TIM_OCInitTypeDef TIM_OCInitStructure;
+
+    // 启用TIM1和GPIOA时钟
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
+
+    // 配置PA8和PA9为复用推挽输出
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    // 配置TIM1时基
+    TIM_TimeBaseStructure.TIM_Period = PWM_PERIOD - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 71;  // 72MHz / 72 = 1MHz
+    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
+
+    // 配置TIM1通道1 (PA8) 为PWM模式
+    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
+    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+    TIM_OCInitStructure.TIM_Pulse = 0;
+    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+    TIM_OC1Init(TIM1, &TIM_OCInitStructure);
+    TIM_OC1PreloadConfig(TIM1, TIM_OCPreload_Enable);
+
+    // 配置TIM1通道2 (PA9) 为PWM模式
+    TIM_OCInitStructure.TIM_Pulse = 0;
+    TIM_OC2Init(TIM1, &TIM_OCInitStructure);
+    TIM_OC2PreloadConfig(TIM1, TIM_OCPreload_Enable);
+
+    // 启用TIM1主输出
+    TIM_CtrlPWMOutputs(TIM1, ENABLE);
+    
+    // 启用TIM1
+    TIM_Cmd(TIM1, ENABLE);
 }
+
 void PWM_SetCompare1(uint16_t Compare)
 {
-	// 限制占空比范围
-	if (Compare > PWM_PERIOD)
-	{
-		Compare = PWM_PERIOD;
-	}
-	pwm_compare1 = Compare;
+    if (Compare > PWM_PERIOD)
+    {
+        Compare = PWM_PERIOD;
+    }
+    TIM_SetCompare1(TIM1, Compare);
 }
+
 void PWM_SetCompare2(uint16_t Compare)
 {
-	// 限制占空比范围
-	if (Compare > PWM_PERIOD)
-	{
-		Compare = PWM_PERIOD;
-	}
-	pwm_compare2 = Compare;
+    if (Compare > PWM_PERIOD)
+    {
+        Compare = PWM_PERIOD;
+    }
+    TIM_SetCompare2(TIM1, Compare);
 }
-// PWM任务函数，需要在主循环中调用
+
 void PWM_Task(void)
 {
-	if (!pwm_running)
-	{
-		return;
-	}
-	// 生成PWM波形，同时设置PA8和PA9的高电平
-	if (pwm_compare1 > 0)
-	{
-		GPIO_SetBits(GPIOA, GPIO_Pin_8);
-	}
-	else
-	{
-		GPIO_ResetBits(GPIOA, GPIO_Pin_8); // 显式设置为低电平
-	}
-	if (pwm_compare2 > 0)
-	{
-		GPIO_SetBits(GPIOA, GPIO_Pin_9);
-	}
-	else
-	{
-		GPIO_ResetBits(GPIOA, GPIO_Pin_9); // 显式设置为低电平
-	}
-	// 延时高电平时间，取最大的占空比
-	uint16_t max_compare = (pwm_compare1 > pwm_compare2) ? pwm_compare1 : pwm_compare2;
-	Delay_us(max_compare * PWM_UNIT_TIME);
-	// 同时置低PA8和PA9
-	if (pwm_compare1 > 0)
-	{
-		GPIO_ResetBits(GPIOA, GPIO_Pin_8);
-	}
-	if (pwm_compare2 > 0)
-	{
-		GPIO_ResetBits(GPIOA, GPIO_Pin_9);
-	}
-	// 延时剩余时间，保持周期稳定
-	if (max_compare < PWM_PERIOD)
-	{
-		Delay_us((PWM_PERIOD - max_compare) * PWM_UNIT_TIME);
-	}
+    // 硬件PWM不需要任务处理
+}
+
+uint16_t PWM_GetCompare1(void)
+{
+    return TIM_GetCapture1(TIM1);
+}
+
+uint16_t PWM_GetCompare2(void)
+{
+    return TIM_GetCapture2(TIM1);
 }

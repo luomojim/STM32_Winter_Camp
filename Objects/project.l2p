@@ -34,7 +34,6 @@
 ".\objects\motor.o"
 ".\objects\ultrasound.o"
 ".\objects\irsensor.o"
-".\objects\pid.o"
 --strict --scatter ".\Objects\project.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

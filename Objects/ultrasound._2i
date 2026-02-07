@@ -1,0 +1,6 @@
+--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\car -I E:\Keil\ARM\ARMCC\include -I .\start -I .\library -I .\user -I .\
+-I.\RTE\_Target_1
+-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.4.1\Device\Include
+-IC:\Keil_v5\ARM\CMSIS\Include
+-D__UVISION_VERSION="524" -DSTM32F10X_LD -DSTM32F103C6 -DUSE_STDPERIPH_DRIVER
+-o .\objects\ultrasound.o --omf_browse .\objects\ultrasound.crf --depend .\objects\ultrasound.d --feedback ".\Objects\project.fed" "Ultrasound.c"

@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060528: Last Updated: Fri Feb 06 22:08:35 2026
+;#<FEEDBACK># ARM Linker, 5060528: Last Updated: Sat Feb 07 16:31:41 2026
 ;VERSION 0.2
 ;FILE core_cm3.o
 __REV16 <= USED 0
@@ -10,6 +10,7 @@ __set_PSP <= USED 0
 ;FILE delay.o
 Delay_s <= USED 0
 ;FILE irsensor.o
+IRSensor_Init <= USED 0
 ;FILE led.o
 LED1_Turn <= USED 0
 LED2_Turn <= USED 0
@@ -22,6 +23,8 @@ NVIC_SetVectorTable <= USED 0
 NVIC_SystemLPConfig <= USED 0
 SysTick_CLKSourceConfig <= USED 0
 ;FILE motor.o
+Motor_Left <= USED 0
+Motor_Right <= USED 0
 ;FILE oled.o
 OLED_Clear <= USED 0
 OLED_Init <= USED 0
@@ -33,9 +36,6 @@ OLED_ShowHexNum <= USED 0
 OLED_ShowNum <= USED 0
 OLED_ShowSignedNum <= USED 0
 OLED_ShowString <= USED 0
-;FILE pid.o
-PID_Calc <= USED 0
-PID_Init <= USED 0
 ;FILE pwm.o
 ;FILE startup_stm32f10x_md.o
 ;FILE stm32f10x_adc.o
@@ -424,7 +424,9 @@ TIM_GetFlagStatus <= USED 0
 TIM_GetPrescaler <= USED 0
 TIM_ICInit <= USED 0
 TIM_ICStructInit <= USED 0
+TIM_ITConfig <= USED 0
 TIM_ITRxExternalClockConfig <= USED 0
+TIM_InternalClockConfig <= USED 0
 TIM_OC1FastConfig <= USED 0
 TIM_OC1Init <= USED 0
 TIM_OC1NPolarityConfig <= USED 0
@@ -512,3 +514,4 @@ WWDG_SetWindowValue <= USED 0
 ;FILE system_stm32f10x.o
 SystemCoreClockUpdate <= USED 0
 ;FILE ultrasound.o
+Ultrasonic_Init <= USED 0

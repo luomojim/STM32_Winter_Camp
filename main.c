@@ -17,14 +17,14 @@ uint8_t ultrasonic_invalid_count = 0;
 
 int main(void)
 {
-    TIM_TimeBaseInitTypeDef TIM_TimeBaseStruct;
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
-    TIM_TimeBaseStruct.TIM_Period = 0xFFFF;
-    TIM_TimeBaseStruct.TIM_Prescaler = 71;
-    TIM_TimeBaseStruct.TIM_ClockDivision = 0;
-    TIM_TimeBaseStruct.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStruct);
-    TIM_Cmd(TIM2, ENABLE);
+    // TIM_TimeBaseInitTypeDef TIM_TimeBaseStruct;
+    // RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+    // TIM_TimeBaseStruct.TIM_Period = 0xFFFF;
+    // TIM_TimeBaseStruct.TIM_Prescaler = 71;
+    // TIM_TimeBaseStruct.TIM_ClockDivision = 0;
+    // TIM_TimeBaseStruct.TIM_CounterMode = TIM_CounterMode_Up;
+    // TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStruct);
+    // TIM_Cmd(TIM2, ENABLE);
 
     Motor_Init();
 

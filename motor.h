@@ -2,7 +2,7 @@
 #define __MOTOR_H
 #include "stm32f10x.h"
 
-#define MOTOR_PORT GPIOA 
+#define MOTOR_PORT GPIOA
 #define IN1_PIN GPIO_Pin_0
 #define IN2_PIN GPIO_Pin_1
 #define IN3_PIN GPIO_Pin_2
@@ -23,15 +23,16 @@
 #define MOTOR_DIRECTION_REVERSE 1
 
 #define NORMAL_LEFT_SPEED 70.0f
-#define NORMAL_RIGHT_SPEED 60.0f
+#define NORMAL_RIGHT_SPEED 70.0f
+
 #define TURN_SPEED 50.0f
 #define BACK_SPEED 50.0f
 
 #define IR_PORT GPIOA
 #define RED1_PIN GPIO_Pin_4
 #define RED2_PIN GPIO_Pin_5
-#define RED3_PIN GPIO_Pin_8
-#define RED4_PIN GPIO_Pin_9
+// #define RED3_PIN GPIO_Pin_8
+// #define RED4_PIN GPIO_Pin_9
 #define RED5_PIN GPIO_Pin_11
 #define RED6_PIN GPIO_Pin_12
 
@@ -55,7 +56,7 @@ void Motor_TurnRight90(void);
 void Motor_TurnLeft90(void);
 void Motor_ResumeNormal(void);
 
-uint8_t IRSensor_Detect(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
+uint8_t IRSensor_Detect(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin);
 float Test_Distance(void);
 
 #endif

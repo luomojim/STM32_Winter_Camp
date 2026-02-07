@@ -23,7 +23,7 @@ void PWM_Init(void)
 
     // 配置TIM1时基
     TIM_TimeBaseStructure.TIM_Period = PWM_PERIOD - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = 71;  // 72MHz / 72 = 1MHz
+    TIM_TimeBaseStructure.TIM_Prescaler = 71; // 72MHz / 72 = 1MHz
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
@@ -43,7 +43,7 @@ void PWM_Init(void)
 
     // 启用TIM1主输出
     TIM_CtrlPWMOutputs(TIM1, ENABLE);
-    
+
     // 启用TIM1
     TIM_Cmd(TIM1, ENABLE);
 }

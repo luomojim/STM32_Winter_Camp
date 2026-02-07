@@ -58,11 +58,11 @@ void move_delay(float cm, float speed)
  */
 void move_back(float cm)
 {
-    // DRV8833倒车逻辑：IN1=1, IN2=0；IN3=0, IN4=1
-    GPIO_SetBits(MOTOR_PORT, IN1_PIN);
-    GPIO_ResetBits(MOTOR_PORT, IN2_PIN);
-    GPIO_ResetBits(MOTOR_PORT, IN3_PIN);
-    GPIO_SetBits(MOTOR_PORT, IN4_PIN);
+    // DRV8833倒车逻辑：IN1=0, IN2=1；IN3=1, IN4=0
+    GPIO_ResetBits(MOTOR_PORT, IN1_PIN);
+    GPIO_SetBits(MOTOR_PORT, IN2_PIN);
+    GPIO_SetBits(MOTOR_PORT, IN3_PIN);
+    GPIO_ResetBits(MOTOR_PORT, IN4_PIN);
 
     PWM_SetCompare1((uint16_t)limit_pwm(BACK_SPEED));
     PWM_SetCompare2((uint16_t)limit_pwm(BACK_SPEED));
@@ -76,11 +76,11 @@ void move_back(float cm)
  */
 void move_forward(float cm, float left_speed, float right_speed)
 {
-    // DRV8833直行逻辑：IN1=0, IN2=1；IN3=1, IN4=0
-    GPIO_ResetBits(MOTOR_PORT, IN1_PIN);
-    GPIO_SetBits(MOTOR_PORT, IN2_PIN);
-    GPIO_SetBits(MOTOR_PORT, IN3_PIN);
-    GPIO_ResetBits(MOTOR_PORT, IN4_PIN);
+    // DRV8833直行逻辑：IN1=1, IN2=0；IN3=0, IN4=1
+    GPIO_SetBits(MOTOR_PORT, IN1_PIN);
+    GPIO_ResetBits(MOTOR_PORT, IN2_PIN);
+    GPIO_ResetBits(MOTOR_PORT, IN3_PIN);
+    GPIO_SetBits(MOTOR_PORT, IN4_PIN);
 
     PWM_SetCompare1((uint16_t)limit_pwm(left_speed));
     PWM_SetCompare2((uint16_t)limit_pwm(right_speed));
@@ -96,8 +96,8 @@ void turn_right_90(void)
 {
     // 右转：左电机转，右电机刹车
     Motor_Right_Brake();
-    GPIO_ResetBits(MOTOR_PORT, IN1_PIN);
-    GPIO_SetBits(MOTOR_PORT, IN2_PIN);
+    GPIO_SetBits(MOTOR_PORT, IN1_PIN);
+    GPIO_ResetBits(MOTOR_PORT, IN2_PIN);
     PWM_SetCompare1((uint16_t)limit_pwm(TURN_SPEED));
     Delay_ms(800); // 转向延时，可微调
 
@@ -111,8 +111,8 @@ void turn_left_90(void)
 {
     // 左转：右电机转，左电机刹车
     Motor_Left_Brake();
-    GPIO_SetBits(MOTOR_PORT, IN3_PIN);
-    GPIO_ResetBits(MOTOR_PORT, IN4_PIN);
+    GPIO_ResetBits(MOTOR_PORT, IN3_PIN);
+    GPIO_SetBits(MOTOR_PORT, IN4_PIN);
     PWM_SetCompare2((uint16_t)limit_pwm(TURN_SPEED));
     Delay_ms(800); // 转向延时，可微调
 
@@ -125,10 +125,10 @@ void turn_left_90(void)
 void resume_normal(void)
 {
     // 恢复DRV8833正转电平+正常速度
-    GPIO_ResetBits(MOTOR_PORT, IN1_PIN);
-    GPIO_SetBits(MOTOR_PORT, IN2_PIN);
-    GPIO_SetBits(MOTOR_PORT, IN3_PIN);
-    GPIO_ResetBits(MOTOR_PORT, IN4_PIN);
+    GPIO_SetBits(MOTOR_PORT, IN1_PIN);
+    GPIO_ResetBits(MOTOR_PORT, IN2_PIN);
+    GPIO_ResetBits(MOTOR_PORT, IN3_PIN);
+    GPIO_SetBits(MOTOR_PORT, IN4_PIN);
 
     PWM_SetCompare1((uint16_t)limit_pwm(NORMAL_LEFT_SPEED));
     PWM_SetCompare2((uint16_t)limit_pwm(NORMAL_RIGHT_SPEED));

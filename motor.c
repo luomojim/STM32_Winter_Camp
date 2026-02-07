@@ -44,7 +44,6 @@ void Motor_Forward(float left_pwm, float right_pwm)
     // 设置DRV8833正转电平
     GPIO_SetBits(MOTOR_PORT, IN1_PIN);
     GPIO_ResetBits(MOTOR_PORT, IN2_PIN);
-
     GPIO_ResetBits(MOTOR_PORT, IN3_PIN);
     GPIO_SetBits(MOTOR_PORT, IN4_PIN);
 

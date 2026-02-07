@@ -94,8 +94,8 @@ void Motor_Forward(float left_pwm, float right_pwm)
     right_pwm = limit_pwm(right_pwm);
 
     // 左轮前进 (PA0 PWM, PA1 Low)
-    TIM_SetCompare1(TIM2, (uint16_t)left_pwm);
-    TIM_SetCompare2(TIM2, 0);
+    TIM_SetCompare1(TIM2, 0);
+    TIM_SetCompare2(TIM2, (uint16_t)left_pwm);
 
     // 右轮前进 (PA2 PWM, PA3 Low)
     TIM_SetCompare3(TIM2, (uint16_t)right_pwm);
@@ -109,8 +109,8 @@ void Motor_Back(float left_pwm, float right_pwm)
     right_pwm = limit_pwm(right_pwm);
 
     // 左轮后退 (PA0 Low, PA1 PWM)
-    TIM_SetCompare1(TIM2, 0);
-    TIM_SetCompare2(TIM2, (uint16_t)left_pwm);
+    TIM_SetCompare1(TIM2, (uint16_t)left_pwm);
+    TIM_SetCompare2(TIM2, 0);
 
     // 右轮后退 (PA2 Low, PA3 PWM)
     TIM_SetCompare3(TIM2, 0);
@@ -139,8 +139,8 @@ void Motor_Right(float left_pwm)
     left_pwm = limit_pwm(left_pwm);
 
     // 左轮前进
-    TIM_SetCompare1(TIM2, (uint16_t)left_pwm);
-    TIM_SetCompare2(TIM2, 0);
+    TIM_SetCompare1(TIM2, 0);
+    TIM_SetCompare2(TIM2, (uint16_t)TURN_SPEED);
 
     // 右轮停止
     TIM_SetCompare3(TIM2, 0);
@@ -182,8 +182,8 @@ void Motor_MoveBack(float cm)
 void Motor_TurnRight90(void)
 {
     // 原地右转：左轮前，右轮后
-    TIM_SetCompare1(TIM2, (uint16_t)TURN_SPEED); // 左轮前
-    TIM_SetCompare2(TIM2, 0);
+    TIM_SetCompare1(TIM2, 0);
+    TIM_SetCompare2(TIM2, (uint16_t)TURN_SPEED);
     TIM_SetCompare3(TIM2, 0);
     TIM_SetCompare4(TIM2, (uint16_t)TURN_SPEED); // 右轮后
 
@@ -194,8 +194,8 @@ void Motor_TurnRight90(void)
 void Motor_TurnLeft90(void)
 {
     // 原地左转：左轮后，右轮前
-    TIM_SetCompare1(TIM2, 0);
-    TIM_SetCompare2(TIM2, (uint16_t)TURN_SPEED); // 左轮后
+    TIM_SetCompare1(TIM2, (uint16_t)TURN_SPEED);
+    TIM_SetCompare2(TIM2, 0);
     TIM_SetCompare3(TIM2, (uint16_t)TURN_SPEED); // 右轮前
     TIM_SetCompare4(TIM2, 0);
 

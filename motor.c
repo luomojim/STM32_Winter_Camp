@@ -16,13 +16,14 @@ static void Motor_GPIO_Init(void)
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(MOTOR_PORT, &GPIO_InitStruct);
 
-    GPIO_InitStruct.GPIO_Pin = MOTOR_TT1_A | MOTOR_TT1_B;
-    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPU;
-    GPIO_Init(MOTOR_TT1_PORT, &GPIO_InitStruct);
+    // 注释掉下面的部分
+    //  GPIO_InitStruct.GPIO_Pin = MOTOR_TT1_A | MOTOR_TT1_B;
+    //  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPU;
+    //  GPIO_Init(MOTOR_TT1_PORT, &GPIO_InitStruct);
 
-    GPIO_InitStruct.GPIO_Pin = MOTOR_TT2_A | MOTOR_TT2_B;
-    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPU;
-    GPIO_Init(MOTOR_TT2_PORT, &GPIO_InitStruct);
+    // GPIO_InitStruct.GPIO_Pin = MOTOR_TT2_A | MOTOR_TT2_B;
+    // GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPU;
+    // GPIO_Init(MOTOR_TT2_PORT, &GPIO_InitStruct);
 
     GPIO_ResetBits(MOTOR_PORT, IN1_PIN | IN2_PIN | IN3_PIN | IN4_PIN);
 }
@@ -45,7 +46,8 @@ uint8_t Motor_GetDirection(void)
 
 static float limit_pwm(float pwm)
 {
-    return (pwm > 99) ? 99 : (pwm < 0) ? 0 : pwm;
+    return (pwm > 99) ? 99 : (pwm < 0) ? 0
+                                       : pwm;
 }
 
 static void move_delay(float cm, float speed)

@@ -5,8 +5,8 @@
 #include "Ultrasound.h"
 
 // ================= 宏定义参数 =================
-#define STOP_DISTANCE 15.0f   // 超声波停车距离(cm)
-#define WALL_ADJUST_PWM 15.0f // 巡墙纠偏时增加的PWM值
+#define STOP_DISTANCE 15.0f    // 超声波停车距离(cm)
+#define WALL_ADJUST_PWM 15.0f  // 巡墙纠偏时增加的PWM值
 #define STRAIGHT_TIMEOUT 12000 // 直行超时时间(ms)
 
 // ================= 状态变量 =================
@@ -36,6 +36,22 @@ int main(void)
         r6 = IRSensor_Detect(IR_PORT, RED6_PIN); // 右侧
         distance = Test_Distance();
 
+        // 正常直行，超过12s，自动执行
+        if (straight_mode == 1 && straight_time >= STRAIGHT_TIMEOUT)
+        {
+            // 执行动作：倒车10cm -> 右转90度 -> 正常直行
+            Motor_MoveBack(10.0f);
+            Motor_TurnRight90();
+            Motor_ResumeNormal(); // 恢复直行速度
+
+            // 重置状态
+            straight_time = 0; // 清零计时器
+            straight_mode = 1; // 保持直行模式标记为1，继续视为直行状态
+
+            Delay_ms(10); // 稍微防抖
+            continue;     // 【关键】跳过本次循环剩余代码，重新开始读取传感器
+        }
+
         // 3. 判断是否需要停车 (超声波触发 或 任意前方红外触发)
         uint8_t ultra_stop = 0;
         if (distance > 0.1f && distance <= STOP_DISTANCE)
@@ -50,13 +66,13 @@ int main(void)
             // 前方有障碍或超声波触发，退出直行模式
             straight_mode = 0;
             straight_time = 0;
-            
+
             // 场景1-5: 超声停车触发或前方红外触发
             Motor_Stop();
             Delay_ms(1000); // 停车1s
 
             // 场景1: RED1+RED2同触 + RED5/6均未触
-            if (r1 == IR_HAVE_OBSTACLE && r2 == IR_HAVE_OBSTACLE && 
+            if (r1 == IR_HAVE_OBSTACLE && r2 == IR_HAVE_OBSTACLE &&
                 r5 == IR_NO_OBSTACLE && r6 == IR_NO_OBSTACLE)
             {
                 Delay_ms(200);
@@ -67,7 +83,7 @@ int main(void)
                 Motor_ResumeNormal();
             }
             // 场景2: RED1+RED2同触 + RED5未触+RED6触发
-            else if (r1 == IR_HAVE_OBSTACLE && r2 == IR_HAVE_OBSTACLE && 
+            else if (r1 == IR_HAVE_OBSTACLE && r2 == IR_HAVE_OBSTACLE &&
                      r5 == IR_NO_OBSTACLE && r6 == IR_HAVE_OBSTACLE)
             {
                 Delay_ms(200);
@@ -78,7 +94,7 @@ int main(void)
                 Motor_ResumeNormal();
             }
             // 场景3: RED1+RED2同触 + RED6未触+RED5触发
-            else if (r1 == IR_HAVE_OBSTACLE && r2 == IR_HAVE_OBSTACLE && 
+            else if (r1 == IR_HAVE_OBSTACLE && r2 == IR_HAVE_OBSTACLE &&
                      r5 == IR_HAVE_OBSTACLE && r6 == IR_NO_OBSTACLE)
             {
                 Delay_ms(200);
@@ -89,7 +105,7 @@ int main(void)
                 Motor_ResumeNormal();
             }
             // 场景4: RED1单触 + RED2/5/6均未触
-            else if (r1 == IR_HAVE_OBSTACLE && r2 == IR_NO_OBSTACLE && 
+            else if (r1 == IR_HAVE_OBSTACLE && r2 == IR_NO_OBSTACLE &&
                      r5 == IR_NO_OBSTACLE && r6 == IR_NO_OBSTACLE)
             {
                 Motor_MoveBack(10.0f);
@@ -103,7 +119,7 @@ int main(void)
                 Motor_ResumeNormal();
             }
             // 场景5: RED2单触 + RED1/5/6均未触
-            else if (r1 == IR_NO_OBSTACLE && r2 == IR_HAVE_OBSTACLE && 
+            else if (r1 == IR_NO_OBSTACLE && r2 == IR_HAVE_OBSTACLE &&
                      r5 == IR_NO_OBSTACLE && r6 == IR_NO_OBSTACLE)
             {
                 Motor_MoveBack(10.0f);
@@ -136,7 +152,7 @@ int main(void)
                 straight_mode = 1;
                 straight_time = 0;
             }
-            
+
             // 场景6: RED1/RED2均未触，根据左右传感器调整
             // (1) 若RED5单触: 左轮加速、右轮正常（远离左墙）
             if (r5 == IR_HAVE_OBSTACLE && r6 == IR_NO_OBSTACLE)
@@ -164,9 +180,9 @@ int main(void)
                 Motor_ResumeNormal();
                 straight_time += 10;
             }
-            
+
             // 检查直行超时
-            Check_Straight_Timeout();
+            // Check_Straight_Timeout();
         }
 
         Delay_ms(10); // 循环小延时
@@ -182,7 +198,7 @@ void Check_Straight_Timeout(void)
         Motor_MoveBack(10.0f);
         Motor_TurnRight90();
         Motor_ResumeNormal();
-        
+
         // 重置计时器，保持直行模式
         straight_time = 0;
     }

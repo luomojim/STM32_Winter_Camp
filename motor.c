@@ -153,7 +153,7 @@ void Motor_TurnLeft90(void)
     TIM_SetCompare1(TIM2, (uint16_t)TURN_SPEED);  // IN1 = PWM
     TIM_SetCompare2(TIM2, 0);                     // IN2 = 0
     
-    Delay_ms(400);  // 调整时间以匹配90度转弯
+    Delay_ms(500);  // 调整时间以匹配90度转弯
     Motor_Stop();
 }
 
@@ -168,7 +168,7 @@ void Motor_TurnRight90(void)
     TIM_SetCompare1(TIM2, 0);                     // IN1 = 0
     TIM_SetCompare2(TIM2, (uint16_t)TURN_SPEED);  // IN2 = PWM
     
-    Delay_ms(400);  // 调整时间以匹配90度转弯
+    Delay_ms(500);  // 调整时间以匹配90度转弯
     Motor_Stop();
 }
 

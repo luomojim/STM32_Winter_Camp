@@ -28,7 +28,7 @@
 .\objects\main.o: .\library\stm32f10x_usart.h
 .\objects\main.o: .\library\stm32f10x_wwdg.h
 .\objects\main.o: .\library\misc.h
+.\objects\main.o: delay.h
 .\objects\main.o: motor.h
 .\objects\main.o: IRSensor.h
-.\objects\main.o: delay.h
 .\objects\main.o: Ultrasound.h

@@ -251,8 +251,8 @@ void System_Init_All(void)
 //     System_Init();
 
 //     // ?????(??SysTick)
-//     delay_init();
-
+//    delay_init();
+//
 //     // ???GPIO
 // GPIO_Init_All();
 

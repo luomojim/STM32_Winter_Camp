@@ -28,4 +28,5 @@
 .\objects\ultrasound.o: .\library\stm32f10x_usart.h
 .\objects\ultrasound.o: .\library\stm32f10x_wwdg.h
 .\objects\ultrasound.o: .\library\misc.h
+.\objects\ultrasound.o: Ultrasound.h
 .\objects\ultrasound.o: Delay.h
